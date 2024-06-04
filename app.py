@@ -19,7 +19,7 @@ app.add_middleware(
 def read_root():
     return {"Good luck!": "Have a nice day :)"}
 
-app.include_router(portfolio_router)
+#app.include_router(portfolio_router)
 
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8000)
