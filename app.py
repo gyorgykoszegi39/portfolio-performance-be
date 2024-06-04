@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 import matplotlib
-from controllers.portfolio_controller import router as portfolio_router
+#from controllers.portfolio_controller import router as portfolio_router
 
 app = FastAPI()
 matplotlib.use('Agg')
