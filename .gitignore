@@ -131,4 +131,3 @@ dmypy.json
 
 # pip-compile and pip-sync requirements files
 *.in
-requirements.txt
