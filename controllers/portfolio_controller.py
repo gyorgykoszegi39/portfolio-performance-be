@@ -5,19 +5,19 @@ This module orchestrates the reading and processing of the portfolio data.
 
 GET Endpoints:
     /etf-prices
-        Returns a diagram of ETF prices over time.
+        Returns a line chart of ETF prices over time.
     /monthly-portfolio-performance
-        Returns diagrams and a table of the monthly portfolio performance in USD and %.
-    /annually-portfolio-performance
-        Returns diagrams and a table of the annual portfolio performance in USD and %.
+        Returns line charts and a table of the monthly portfolio performance in USD and %.
+    /annual-portfolio-performance
+        Returns line charts and a table of the annual portfolio performance in USD and %.
     /positions-value-per-etf
-        Returns a diagram of position value per ETF over time.
+        Returns a line chart of position value per ETF over time.
     /positions-value
-        Returns a diagram of position value over time.
+        Returns a line chart of position value over time.
     /cash-flow
-        Returns a diagram of cash on hand over time.
+        Returns a line chart of cash on hand over time.
     /combined-cash-flow-positions-value
-        Returns a diagram of the combined cash on hand and positions value over time.
+        Returns a line chart of the combined cash on hand and positions value over time.
     /risk-measures
         Returns the value of the standard deviation of daily returns.
 '''
@@ -49,6 +49,23 @@ def get_etf_prices(
     display_data_to: str = Query(default=DEFAULT_DISPLAY_DATA_TO),
     exclude_etfs: str = Query(default=DEFAULT_EXCLUDE_ETFS)
 ):
+    '''
+    Gets ETFs price over time.
+    Sends a line chart of ETFs prices between the specified date range.
+
+    Args:
+        display_data_from:
+            The line chart will show data starting from this date.
+            Optional. A str date in %d-%m-%Y format, by default is '03-01-2005'.
+        display_data_to: 
+            The line chart will show data up to this date.
+            Optional. A str date in %d-%m-%Y format, by default is '29-05-2024'.
+        exclude_etfs:
+            Optional. List of string ETFs to exclude from dataset, by default is empty.
+
+    Returns:
+        Returns an image/png media_type line chart of ETF prices over time. 
+    '''
     display_data_from = datetime.strptime(display_data_from, '%d-%m-%Y')
     display_data_to = datetime.strptime(display_data_to, '%d-%m-%Y')
     exclude_etfs = json.loads(exclude_etfs)
@@ -68,6 +85,37 @@ def get_monthly_portfolio_performance(
     display_data_to: str = Query(default=DEFAULT_DISPLAY_DATA_TO),
     exclude_etfs: str = Query(default=DEFAULT_EXCLUDE_ETFS)
 ):
+    '''
+    Gets monthly portfolio performance in USD and in %.
+
+    Args:
+        display_data_from:
+            The line chart will show data starting from this date.
+            Optional. A str date in %d-%m-%Y format, by default is '03-01-2005'.
+        display_data_to: 
+            The line chart will show data up to this date.
+            Optional. A str date in %d-%m-%Y format, by default is '29-05-2024'.
+        exclude_etfs:
+            Optional. List of string ETFs to exclude from dataset, by default is empty.
+
+    Returns:
+        Returns a JSON of line charts.
+        A table with the monthly portfolio performance in USD and %.
+        "content": 
+            {
+                "value": [
+                    {
+                        "2005-01-31": {
+                            "USD value": float
+                            "% value: float
+                        },
+                        ...
+                    }
+                ],
+                "lineChartUSD": "encode_image_to_base64",
+                "lineChartPercentage": "encode_image_to_base64"
+            }
+    '''
     display_data_from = datetime.strptime(display_data_from, '%d-%m-%Y')
     display_data_to = datetime.strptime(display_data_to, '%d-%m-%Y')
     exclude_etfs = json.loads(exclude_etfs)
@@ -104,16 +152,47 @@ def get_monthly_portfolio_performance(
 
     return JSONResponse(content={
         "value": m_portfolio_perf.to_dict(orient="index"),
-        "diagramUSD": dia.encode_image_to_base64(plot_buffer_usd),
-        "diagramPercentage": dia.encode_image_to_base64(plot_buffer_percentage)
+        "line chartUSD": dia.encode_image_to_base64(plot_buffer_usd),
+        "line chartPercentage": dia.encode_image_to_base64(plot_buffer_percentage)
     })
 
-@router.get("/annually-portfolio-performance")
-def get_annually_portfolio_performance(
+@router.get("/annual-portfolio-performance")
+def get_annual_portfolio_performance(
     display_data_from: str = Query(default=DEFAULT_DISPLAY_DATA_FROM),
     display_data_to: str = Query(default=DEFAULT_DISPLAY_DATA_TO),
     exclude_etfs: str = Query(default=DEFAULT_EXCLUDE_ETFS)
 ):
+    '''
+    Gets annual portfolio performance in USD and in %.
+
+    Args:
+        display_data_from:
+            The line chart will show data starting from this date.
+            Optional. A str date in %d-%m-%Y format, by default is '03-01-2005'.
+        display_data_to: 
+            The line chart will show data up to this date.
+            Optional. A str date in %d-%m-%Y format, by default is '29-05-2024'.
+        exclude_etfs:
+            Optional. List of string ETFs to exclude from dataset, by default is empty.
+
+    Returns:
+        Returns a json of line charts.
+        A table with the annual portfolio performance in USD and %.
+        "content": 
+            {
+                "value": [
+                    {
+                        "2005-01-31": {
+                            "USD value": float
+                            "% value: float
+                        },
+                        ...
+                    }
+                ],
+                "lineChartUSD": "encode_image_to_base64",
+                "lineChartPercentage": "encode_image_to_base64"
+            }
+    '''
     display_data_from = datetime.strptime(display_data_from, '%d-%m-%Y')
     display_data_to = datetime.strptime(display_data_to, '%d-%m-%Y')
     exclude_etfs = json.loads(exclude_etfs)
@@ -137,11 +216,11 @@ def get_annually_portfolio_performance(
     y_portfolio_perf_usd_filtered = y_portfolio_perf_usd.loc[display_data_from:display_data_to]
     y_portfolio_perf_perc_filtered = y_portfolio_perf_perc.loc[display_data_from:display_data_to]
     with plot_lock:
-        dia.create_plot_data(y_portfolio_perf_usd_filtered, "Annually Portfolio Performance")
+        dia.create_plot_data(y_portfolio_perf_usd_filtered, "Annual Portfolio Performance")
         plot_buffer_usd = dia.write_plot_to_buffer()
         dia.create_plot_data(
             y_portfolio_perf_perc_filtered,
-            "Annually Portfolio Performance",
+            "Annual Portfolio Performance",
             ylabel='% value'
         )
         plot_buffer_percentage = dia.write_plot_to_buffer()
@@ -150,8 +229,8 @@ def get_annually_portfolio_performance(
 
     return JSONResponse(content={
         "value": y_portfolio_perf.to_dict(orient="index"),
-        "diagramUSD": dia.encode_image_to_base64(plot_buffer_usd),
-        "diagramPercentage": dia.encode_image_to_base64(plot_buffer_percentage)
+        "line chartUSD": dia.encode_image_to_base64(plot_buffer_usd),
+        "line chartPercentage": dia.encode_image_to_base64(plot_buffer_percentage)
     })
 
 @router.get("/positions-value-per-etf")
@@ -160,6 +239,23 @@ def get_positions_value_per_etf(
     display_data_to: str = Query(default=DEFAULT_DISPLAY_DATA_TO),
     exclude_etfs: str = Query(default=DEFAULT_EXCLUDE_ETFS)
 ):
+    '''
+    Gets positions value per ETFs over time.
+    Sends a line chart of them between the specified date range.
+
+    Args:
+        display_data_from:
+            The line chart will show data starting from this date.
+            Optional. A str date in %d-%m-%Y format, by default is '03-01-2005'.
+        display_data_to: 
+            The line chart will show data up to this date.
+            Optional. A str date in %d-%m-%Y format, by default is '29-05-2024'.
+        exclude_etfs:
+            Optional. List of string ETFs to exclude from dataset, by default is empty.
+
+    Returns:
+        Returns an image/png media_type line chart of positions value per ETFs over time. 
+    '''
     display_data_from = datetime.strptime(display_data_from, '%d-%m-%Y')
     display_data_to = datetime.strptime(display_data_to, '%d-%m-%Y')
     exclude_etfs = json.loads(exclude_etfs)
@@ -171,7 +267,7 @@ def get_positions_value_per_etf(
     value_per_etf = etf_prices * etf_quantities
     value_per_etf_filtered = value_per_etf.loc[display_data_from:display_data_to]
     with plot_lock:
-        dia.create_plot_data(value_per_etf_filtered, "Positions Value for an ETF Over Time")
+        dia.create_plot_data(value_per_etf_filtered, "Positions Value per ETF Over Time")
         plot_buffer = dia.write_plot_to_buffer()
 
     return StreamingResponse(plot_buffer, media_type="image/png")
@@ -182,6 +278,22 @@ def get_positions_value(
     display_data_to: str = Query(default=DEFAULT_DISPLAY_DATA_TO),
     exclude_etfs: str = Query(default=DEFAULT_EXCLUDE_ETFS)
 ):
+    '''
+    Gets positions value over time and sends a line chart of them between the specified date range.
+
+    Args:
+        display_data_from:
+            The line chart will show data starting from this date.
+            Optional. A str date in %d-%m-%Y format, by default is '03-01-2005'.
+        display_data_to: 
+            The line chart will show data up to this date.
+            Optional. A str date in %d-%m-%Y format, by default is '29-05-2024'.
+        exclude_etfs:
+            Optional. List of string ETFs to exclude from dataset, by default is empty.
+
+    Returns:
+        Returns an image/png media_type line chart of positions value over time. 
+    '''
     display_data_from = datetime.strptime(display_data_from, '%d-%m-%Y')
     display_data_to = datetime.strptime(display_data_to, '%d-%m-%Y')
     exclude_etfs = json.loads(exclude_etfs)
@@ -205,6 +317,16 @@ def get_cash_flow(
     display_data_to: str = Query(default=DEFAULT_DISPLAY_DATA_TO),
     exclude_etfs: str = Query(default=DEFAULT_EXCLUDE_ETFS)
 ):
+    '''
+    Gets cash flow over time and sends a line chart of it between the specified date range.
+
+    Args:
+        exclude_etfs:
+            Optional. List of string ETFs to exclude from dataset, by default is empty.
+
+    Returns:
+        Returns an image/png media_type line chart of cash flow over time. 
+    '''
     display_data_from = datetime.strptime(display_data_from, '%d-%m-%Y')
     display_data_to = datetime.strptime(display_data_to, '%d-%m-%Y')
     exclude_etfs = json.loads(exclude_etfs)
@@ -225,6 +347,14 @@ def get_combined_cash_flow_positions_value(
     display_data_to: str = Query(default=DEFAULT_DISPLAY_DATA_TO),
     exclude_etfs: str = Query(default=DEFAULT_EXCLUDE_ETFS)
 ):
+    '''
+    Gets combined cash flow and positions value over time. 
+    Sends a line chart of it between the specified date range.
+
+    Returns:
+        Returns an image/png media_type line chart of combined cash flow
+        and positions value over time. 
+    '''
     display_data_from = datetime.strptime(display_data_from, '%d-%m-%Y')
     display_data_to = datetime.strptime(display_data_to, '%d-%m-%Y')
     exclude_etfs = json.loads(exclude_etfs)
@@ -248,6 +378,19 @@ def get_combined_cash_flow_positions_value(
 
 @router.get("/risk-measures")
 def get_risk_measures(exclude_etfs: str = Query(default=DEFAULT_EXCLUDE_ETFS)):
+    '''
+    Gets the standard deviation of daily returns.
+
+    Returns:
+        Returns the standard deviation of daily returns as a JSON.
+        {
+            "content":
+            {
+                "standardDeviation": float,
+                "description": "Standard deviation of daily returns(%)."
+            }
+        }
+    '''
     exclude_etfs = json.loads(exclude_etfs)
     etfs_filtered = [x for x in ETFS if x not in exclude_etfs]
 

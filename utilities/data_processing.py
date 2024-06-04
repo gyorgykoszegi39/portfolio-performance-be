@@ -10,7 +10,7 @@ Functions:
     get_cash_flow(etf_prices, start_date, end_date, invested_cash, exclude_etfs):
         Returns cash on hand over time.
     get_portfolio_performance(positions_value, cash_flow, start_date, end_date, freq):
-        Returns monthly or annualy performance of portfolio.
+        Returns monthly or annual performance of portfolio.
     get_standard_deviation_of_daily_returns(positions_value, cash_flow):
         Returns the standard deviation of daily returns.
     calculate_standard_deviation(data): Returns the standard deviation of a dataset.
@@ -187,11 +187,11 @@ def get_portfolio_performance(
         
     Raises: 
         ValueError: Frequency must be either 'M' for monthly portfolio performance 
-        or 'Y' for annually portfolio performance
+        or 'Y' for annual portfolio performance
     '''
     if freq not in ['M', 'Y']:
         raise ValueError("Frequency must be either 'M' for monthly portfolio performance "
-            "or 'Y' for annually portfolio performance")
+            "or 'Y' for annual portfolio performance")
 
     periods = period_range(start=start_date, end=end_date, freq=freq)
     period_tuples = [(period.start_time, period.end_time.floor('D')) for period in periods]

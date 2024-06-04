@@ -1,5 +1,5 @@
 from pandas import read_csv
-import matplotlib.pyplot as plot
+import matplotlib.pyplot as plt
 import utilities.data_processing as dp
 import visualization.ploting as dia
 
@@ -19,11 +19,11 @@ if __name__ == "__main__":
 
     print("Monthly Portfolio Performance")
     print(m_portfolio_perf.to_string(index=True, justify='left'))
-    print("Annually Portfolio Performance")
+    print("Annual Portfolio Performance")
     print(y_portfolio_perf.to_string(index=True, justify='left'))
 
     dia.create_plot_data(etf_prices, "ETF Prices Over Time")
-    dia.create_plot_data(etf_prices * etf_quantities , "Positions Value for an ETF Over Time")
+    dia.create_plot_data(etf_prices * etf_quantities , "Positions Value per ETF Over Time")
     dia.create_plot_data(positions_value, "Positions Value Over Time")
     dia.create_plot_data(cash_flow, "Cash on Hand Over Time")
     dia.create_plot_data(cash_flow + positions_value, "Combined Cash Flow and Positions Value Over Time")
@@ -34,10 +34,10 @@ if __name__ == "__main__":
     y_portfolio_perf_perc = y_portfolio_perf.drop(columns=['USD value'])
     dia.create_plot_data(m_portfolio_perf_usd, "Monthly Portfolio Performance")
     dia.create_plot_data(m_portfolio_perf_perc, "Monthly Portfolio Performance", ylabel='% value')
-    dia.create_plot_data(y_portfolio_perf_usd, "Annually Portfolio Performance")
-    dia.create_plot_data(y_portfolio_perf_perc, "Annually Portfolio Performance", ylabel='% value')
+    dia.create_plot_data(y_portfolio_perf_usd, "Annual Portfolio Performance")
+    dia.create_plot_data(y_portfolio_perf_perc, "Annual Portfolio Performance", ylabel='% value')
 
-    plot.show()
+    plt.show()
 
     standard_deviation_of_daily_returns = dp.get_standard_deviation_of_daily_returns(positions_value, cash_flow)
     print(f"Standard deviation value of the portfolio daily returns: {standard_deviation_of_daily_returns}")

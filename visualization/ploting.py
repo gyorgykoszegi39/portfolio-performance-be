@@ -12,37 +12,37 @@ Functions:
 from io import BytesIO
 from base64 import b64encode
 from pandas import DataFrame
-import matplotlib.pyplot as plot
+import matplotlib.pyplot as plt
 
 def create_plot_data(data_frame:DataFrame, title:str, xlabel:str='Date', ylabel:str='USD value'):
     '''
-    Creates diagrams of the dataset.
+    Creates line charts of the dataset.
 
     Args:
         data_frame:
             The data to be plotted.
         title:
-            The title of the diagram.
+            The title of the line chart.
         xLabel:
             The measure on the x axis. By default is 'Date'.
         yLabel:
             The measure on the y axis. By default is 'USD value'.
     '''
-    plot.figure(figsize=(14, 8))
+    plt.figure(figsize=(14, 8))
     for column in data_frame.columns:
-        plot.plot(data_frame.index, data_frame[column], label=column)
+        plt.plot(data_frame.index, data_frame[column], label=column)
 
-    plot.title(title)
-    plot.xlabel(xlabel)
-    plot.ylabel(ylabel)
-    plot.legend(loc='best')
-    plot.grid(True)
+    plt.title(title)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.legend(loc='best')
+    plt.grid(True)
 
 def write_plot_to_buffer() -> BytesIO:
-    '''Creates and returns a byte buffer from the diagram in the plot.'''
+    '''Creates and returns a byte buffer from the line chart in the plt.'''
 
     plot_buffer = BytesIO()
-    plot.savefig(plot_buffer, format='png')
+    plt.savefig(plot_buffer, format='png')
     plot_buffer.seek(0)
 
     return plot_buffer
