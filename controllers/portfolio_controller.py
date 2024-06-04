@@ -152,8 +152,8 @@ def get_monthly_portfolio_performance(
 
     return JSONResponse(content={
         "value": m_portfolio_perf.to_dict(orient="index"),
-        "line chartUSD": dia.encode_image_to_base64(plot_buffer_usd),
-        "line chartPercentage": dia.encode_image_to_base64(plot_buffer_percentage)
+        "lineChartUSD": dia.encode_image_to_base64(plot_buffer_usd),
+        "lineChartPercentage": dia.encode_image_to_base64(plot_buffer_percentage)
     })
 
 @router.get("/annual-portfolio-performance")
@@ -229,8 +229,8 @@ def get_annual_portfolio_performance(
 
     return JSONResponse(content={
         "value": y_portfolio_perf.to_dict(orient="index"),
-        "line chartUSD": dia.encode_image_to_base64(plot_buffer_usd),
-        "line chartPercentage": dia.encode_image_to_base64(plot_buffer_percentage)
+        "lineChartUSD": dia.encode_image_to_base64(plot_buffer_usd),
+        "lineChartPercentage": dia.encode_image_to_base64(plot_buffer_percentage)
     })
 
 @router.get("/positions-value-per-etf")
