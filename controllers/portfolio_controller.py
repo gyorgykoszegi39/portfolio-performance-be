@@ -1,3 +1,27 @@
+'''
+portfolio_controller.py
+
+This module orchestrates the reading and processing of the portfolio data.
+
+GET Endpoints:
+    /etf-prices
+        Returns a diagram of ETF prices over time.
+    /monthly-portfolio-performance
+        Returns diagrams and a table of the monthly portfolio performance in USD and %.
+    /annually-portfolio-performance
+        Returns diagrams and a table of the annual portfolio performance in USD and %.
+    /positions-value-per-etf
+        Returns a diagram of position value per ETF over time.
+    /positions-value
+        Returns a diagram of position value over time.
+    /cash-flow
+        Returns a diagram of cash on hand over time.
+    /combined-cash-flow-positions-value
+        Returns a diagram of the combined cash on hand and positions value over time.
+    /risk-measures
+        Returns the value of the standard deviation of daily returns.
+'''
+
 import json
 import threading
 from datetime import datetime
@@ -174,7 +198,6 @@ def get_positions_value(
         plot_buffer = dia.write_plot_to_buffer()
 
     return StreamingResponse(plot_buffer, media_type="image/png")
-
 
 @router.get("/cash-flow")
 def get_cash_flow(

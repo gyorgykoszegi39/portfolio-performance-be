@@ -1,3 +1,21 @@
+'''
+data_processing.py
+
+This module provides basic operation to read and calculate the performance of the portfolio.
+
+Functions:
+    get_etf_prices(start_date, end_date, exclude_etfs): Returns ETF prices over time.
+    get_etf_quantities(start_date, end_date, etfs): Returns ETF quantities over time.
+    get_positions_value(etf_prices, etf_quantities): Returns positions value over time.
+    get_cash_flow(etf_prices, start_date, end_date, invested_cash, exclude_etfs):
+        Returns cash on hand over time.
+    get_portfolio_performance(positions_value, cash_flow, start_date, end_date, freq):
+        Returns monthly or annualy performance of portfolio.
+    get_standard_deviation_of_daily_returns(positions_value, cash_flow):
+        Returns the standard deviation of daily returns.
+    calculate_standard_deviation(data): Returns the standard deviation of a dataset.
+'''
+
 from typing import List, Optional
 import math
 from pandas import Timestamp, DataFrame, date_range, period_range, read_csv
@@ -7,7 +25,20 @@ def get_etf_prices(
     end_date: Timestamp,
     exclude_etfs: Optional[List[str]] = None
 ) -> DataFrame:
+    '''
+    Reads ETFs prices from px_etf.csv and fills in the mising dates with forward filling.
 
+    Args:
+        start_date: 
+            In case of missing data acts as the date from which data should be prefilled.
+        end_date: 
+            In case of missing data acts as the date until which data should be forward filled.
+        exclude_etfs:
+            Optional. List of string ETFs to exclude from dataset, by default is empty.
+
+    Returns:
+        Returns pandas DataFrame of ETFs prices, where date is the index and ETFs are columns.
+    '''
     if exclude_etfs is None:
         exclude_etfs = []
     etf_prices = read_csv('px_etf.csv', parse_dates=['Date'], index_col='Date')
@@ -18,6 +49,20 @@ def get_etf_prices(
     return etf_prices
 
 def get_etf_quantities(start_date: Timestamp, end_date: Timestamp, etfs: List[str]) -> DataFrame:
+    '''
+    Reads ETFs quantities from tx_etf.csv and fills in the mising dates with forward filling.
+
+    Args:
+        start_date: 
+            In case of missing data acts as the date from which data should be prefilled.
+        end_date: 
+            In case of missing data acts as the date until which data should be forward filled.
+        etfs:
+            List of string ETFs the dataset should contain.
+
+    Returns:
+        Returns pandas DataFrame of ETFs quantities, where date is the index and ETFs are columns.
+    '''
     etf_transactions = read_csv('tx_etf.csv', parse_dates=['date'])
     etf_quantities = DataFrame(index=etf_transactions['date'].unique(), columns=etfs)
     prev_date = None
@@ -45,6 +90,19 @@ def get_etf_quantities(start_date: Timestamp, end_date: Timestamp, etfs: List[st
     return etf_quantities
 
 def get_positions_value(etf_prices: DataFrame, etf_quantities: DataFrame) -> DataFrame:
+    '''
+    Calculates positions value over time.
+
+    Args:
+        etf_prices: 
+            The price of ETFS over time.
+        etf_quantities: 
+            The quantity of ETFS over time.
+            
+    Returns:
+        Returns pandas DataFrame of positions value,
+        where date is the index and position value is the column.
+    '''
     return DataFrame((etf_prices * etf_quantities).sum(axis=1), columns=["value"])
 
 def get_cash_flow(
@@ -54,7 +112,26 @@ def get_cash_flow(
     invested_cash: float,
     exclude_etfs: Optional[List[str]] = None
 ) -> DataFrame:
+    '''
+    Updates the cash value by reading the transactions from tx_etf.csv
+    and fills in the mising dates with forward filling.
 
+    Args:
+        etf_prices:
+            The price of ETFS over time.
+        start_date: 
+            In case of missing data acts as the date from which data should be prefilled.
+        end_date:
+            In case of missing data acts as the date until which data should be forward filled.
+        invested_cash:
+            The starting sum of the investment.
+        exclude_etfs:
+            Optional. List of string ETFs to exclude from dataset, by default is empty.
+
+    Returns:
+        Returns pandas DataFrame of cash flow, 
+        where date is the index and the cash value is the column.
+    '''
     if exclude_etfs is None:
         exclude_etfs = []
     etf_transactions = read_csv('tx_etf.csv', parse_dates=['date'])
@@ -87,7 +164,31 @@ def get_portfolio_performance(
     end_date: Timestamp,
     freq: str ='Y'
 ) -> DataFrame:
+    '''
+    Calculates the portfolio performance.
 
+    Args:
+        positions_value:
+            The positions value of ETFS over time.
+        cash_flow:
+            The cash on hand value over time.
+        start_date: 
+            The starting date of calculating the portfolio performance.
+        end_date: 
+            The ending date of calculating the portfolio performance.
+        freq:
+            Accepted values are 'Y' - yearly or 'M' - monthly. By default is 'Y'.
+        exclude_etfs:
+            List of string ETFs to exclude from dataset.
+
+    Returns:
+        Returns pandas DataFrame of portfolio performance in USD and %, 
+        where date is the index and portfolio perfoamnce in USD and % are the columns.
+        
+    Raises: 
+        ValueError: Frequency must be either 'M' for monthly portfolio performance 
+        or 'Y' for annually portfolio performance
+    '''
     if freq not in ['M', 'Y']:
         raise ValueError("Frequency must be either 'M' for monthly portfolio performance "
             "or 'Y' for annually portfolio performance")
@@ -117,7 +218,18 @@ def get_standard_deviation_of_daily_returns(
     positions_value: DataFrame,
     cash_flow: DataFrame
 ) -> DataFrame:
+    '''
+    Calculates the standard deviation of daily returns.
 
+    Args:
+        positions_value:
+            The positions value of ETFS over time.
+        cash_flow:
+            The cash on hand value over time.
+
+    Returns:
+        Returns the standard deviation of daily returns as a float number.
+    '''
     portfolio_values = positions_value + cash_flow
     beginning_values = portfolio_values.shift(1)
     daily_returns = (portfolio_values - beginning_values) / beginning_values * 100
@@ -126,6 +238,7 @@ def get_standard_deviation_of_daily_returns(
     return standard_deviation
 
 def calculate_standard_deviation(data: DataFrame) -> float:
+    '''Calculates and returns the standard deviation of a dataset.'''
     mean = data.mean()
     n = len(data)
 
