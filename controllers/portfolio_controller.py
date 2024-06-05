@@ -36,11 +36,11 @@ plot_lock = threading.Lock()
 
 input_data = read_csv('px_etf.csv', parse_dates=['Date'], index_col='Date')
 INVESTMENT = 1e6
-START_DATE = input_data.index[0]
-END_DATE = input_data.index[-1]
-ETFS = input_data.columns.values
-DEFAULT_DISPLAY_DATA_FROM = START_DATE.strftime('%d-%m-%Y')
-DEFAULT_DISPLAY_DATA_TO = END_DATE.strftime('%d-%m-%Y')
+start_date = input_data.index[0]
+end_date = input_data.index[-1]
+etfs = input_data.columns.values
+DEFAULT_DISPLAY_DATA_FROM = start_date.strftime('%d-%m-%Y')
+DEFAULT_DISPLAY_DATA_TO = end_date.strftime('%d-%m-%Y')
 DEFAULT_EXCLUDE_ETFS = json.dumps([])
 
 @router.get("/etf-prices")
@@ -70,7 +70,7 @@ def get_etf_prices(
     display_data_to = datetime.strptime(display_data_to, '%d-%m-%Y')
     exclude_etfs = json.loads(exclude_etfs)
 
-    etf_prices = dp.get_etf_prices(START_DATE, END_DATE, exclude_etfs)
+    etf_prices = dp.get_etf_prices(start_date, end_date, exclude_etfs)
     etf_prices_filtered = etf_prices.loc[display_data_from:display_data_to]
 
     with plot_lock:
@@ -119,18 +119,18 @@ def get_monthly_portfolio_performance(
     display_data_from = datetime.strptime(display_data_from, '%d-%m-%Y')
     display_data_to = datetime.strptime(display_data_to, '%d-%m-%Y')
     exclude_etfs = json.loads(exclude_etfs)
-    etfs_filtered = [x for x in ETFS if x not in exclude_etfs]
+    etfs_filtered = [x for x in etfs if x not in exclude_etfs]
 
-    etf_prices = dp.get_etf_prices(START_DATE, END_DATE, exclude_etfs)
-    etf_quantities = dp.get_etf_quantities(START_DATE, END_DATE, etfs_filtered)
-    cash_flow = dp.get_cash_flow(etf_prices, START_DATE, END_DATE, INVESTMENT, exclude_etfs)
+    etf_prices = dp.get_etf_prices(start_date, end_date, exclude_etfs)
+    etf_quantities = dp.get_etf_quantities(start_date, end_date, etfs_filtered)
+    cash_flow = dp.get_cash_flow(etf_prices, start_date, end_date, INVESTMENT, exclude_etfs)
     positions_value = dp.get_positions_value(etf_prices, etf_quantities)
 
     m_portfolio_perf = dp.get_portfolio_performance(
         positions_value,
         cash_flow,
-        START_DATE,
-        END_DATE,
+        start_date,
+        end_date,
         'M'
     )
 
@@ -196,18 +196,18 @@ def get_annual_portfolio_performance(
     display_data_from = datetime.strptime(display_data_from, '%d-%m-%Y')
     display_data_to = datetime.strptime(display_data_to, '%d-%m-%Y')
     exclude_etfs = json.loads(exclude_etfs)
-    etfs_filtered = [x for x in ETFS if x not in exclude_etfs]
+    etfs_filtered = [x for x in etfs if x not in exclude_etfs]
 
-    etf_prices = dp.get_etf_prices(START_DATE, END_DATE, exclude_etfs)
-    etf_quantities = dp.get_etf_quantities(START_DATE, END_DATE, etfs_filtered)
-    cash_flow = dp.get_cash_flow(etf_prices, START_DATE, END_DATE, INVESTMENT, exclude_etfs)
+    etf_prices = dp.get_etf_prices(start_date, end_date, exclude_etfs)
+    etf_quantities = dp.get_etf_quantities(start_date, end_date, etfs_filtered)
+    cash_flow = dp.get_cash_flow(etf_prices, start_date, end_date, INVESTMENT, exclude_etfs)
     positions_value = dp.get_positions_value(etf_prices, etf_quantities)
 
     y_portfolio_perf = dp.get_portfolio_performance(
         positions_value,
         cash_flow,
-        START_DATE,
-        END_DATE,
+        start_date,
+        end_date,
         'Y'
     )
 
@@ -259,10 +259,10 @@ def get_positions_value_per_etf(
     display_data_from = datetime.strptime(display_data_from, '%d-%m-%Y')
     display_data_to = datetime.strptime(display_data_to, '%d-%m-%Y')
     exclude_etfs = json.loads(exclude_etfs)
-    etfs_filtered = [x for x in ETFS if x not in exclude_etfs]
+    etfs_filtered = [x for x in etfs if x not in exclude_etfs]
 
-    etf_prices = dp.get_etf_prices(START_DATE, END_DATE, exclude_etfs)
-    etf_quantities = dp.get_etf_quantities(START_DATE, END_DATE, etfs_filtered)
+    etf_prices = dp.get_etf_prices(start_date, end_date, exclude_etfs)
+    etf_quantities = dp.get_etf_quantities(start_date, end_date, etfs_filtered)
 
     value_per_etf = etf_prices * etf_quantities
     value_per_etf_filtered = value_per_etf.loc[display_data_from:display_data_to]
@@ -297,10 +297,10 @@ def get_positions_value(
     display_data_from = datetime.strptime(display_data_from, '%d-%m-%Y')
     display_data_to = datetime.strptime(display_data_to, '%d-%m-%Y')
     exclude_etfs = json.loads(exclude_etfs)
-    etfs_filtered = [x for x in ETFS if x not in exclude_etfs]
+    etfs_filtered = [x for x in etfs if x not in exclude_etfs]
 
-    etf_prices = dp.get_etf_prices(START_DATE, END_DATE, exclude_etfs)
-    etf_quantities = dp.get_etf_quantities(START_DATE, END_DATE, etfs_filtered)
+    etf_prices = dp.get_etf_prices(start_date, end_date, exclude_etfs)
+    etf_quantities = dp.get_etf_quantities(start_date, end_date, etfs_filtered)
 
     positions_value = dp.get_positions_value(etf_prices, etf_quantities)
     positions_value_filtered = positions_value.loc[display_data_from:display_data_to]
@@ -331,8 +331,8 @@ def get_cash_flow(
     display_data_to = datetime.strptime(display_data_to, '%d-%m-%Y')
     exclude_etfs = json.loads(exclude_etfs)
 
-    etf_prices = dp.get_etf_prices(START_DATE, END_DATE, exclude_etfs)
-    cash_flow = dp.get_cash_flow(etf_prices, START_DATE, END_DATE, INVESTMENT, exclude_etfs)
+    etf_prices = dp.get_etf_prices(start_date, end_date, exclude_etfs)
+    cash_flow = dp.get_cash_flow(etf_prices, start_date, end_date, INVESTMENT, exclude_etfs)
     cash_flow_filtered = cash_flow.loc[display_data_from:display_data_to]
 
     with plot_lock:
@@ -358,11 +358,11 @@ def get_combined_cash_flow_positions_value(
     display_data_from = datetime.strptime(display_data_from, '%d-%m-%Y')
     display_data_to = datetime.strptime(display_data_to, '%d-%m-%Y')
     exclude_etfs = json.loads(exclude_etfs)
-    etfs_filtered = [x for x in ETFS if x not in exclude_etfs]
+    etfs_filtered = [x for x in etfs if x not in exclude_etfs]
 
-    etf_prices = dp.get_etf_prices(START_DATE, END_DATE, exclude_etfs)
-    etf_quantities = dp.get_etf_quantities(START_DATE, END_DATE, etfs_filtered)
-    cash_flow = dp.get_cash_flow(etf_prices, START_DATE, END_DATE, INVESTMENT, exclude_etfs)
+    etf_prices = dp.get_etf_prices(start_date, end_date, exclude_etfs)
+    etf_quantities = dp.get_etf_quantities(start_date, end_date, etfs_filtered)
+    cash_flow = dp.get_cash_flow(etf_prices, start_date, end_date, INVESTMENT, exclude_etfs)
     positions_value = dp.get_positions_value(etf_prices, etf_quantities)
     combined_cash_position_value = cash_flow + positions_value
     combined_filtered = combined_cash_position_value.loc[display_data_from:display_data_to]
@@ -392,11 +392,11 @@ def get_risk_measures(exclude_etfs: str = Query(default=DEFAULT_EXCLUDE_ETFS)):
         }
     '''
     exclude_etfs = json.loads(exclude_etfs)
-    etfs_filtered = [x for x in ETFS if x not in exclude_etfs]
+    etfs_filtered = [x for x in etfs if x not in exclude_etfs]
 
-    etf_prices = dp.get_etf_prices(START_DATE, END_DATE, exclude_etfs)
-    etf_quantities = dp.get_etf_quantities(START_DATE, END_DATE, etfs_filtered)
-    cash_flow = dp.get_cash_flow(etf_prices, START_DATE, END_DATE, INVESTMENT, exclude_etfs)
+    etf_prices = dp.get_etf_prices(start_date, end_date, exclude_etfs)
+    etf_quantities = dp.get_etf_quantities(start_date, end_date, etfs_filtered)
+    cash_flow = dp.get_cash_flow(etf_prices, start_date, end_date, INVESTMENT, exclude_etfs)
     positions_value = dp.get_positions_value(etf_prices, etf_quantities)
     std_deviation = dp.get_standard_deviation_of_daily_returns(positions_value, cash_flow)
 

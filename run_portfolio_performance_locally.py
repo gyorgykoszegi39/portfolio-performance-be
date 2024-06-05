@@ -6,16 +6,16 @@ import visualization.ploting as dia
 if __name__ == "__main__":
     INVESTMENT = 1e6
     etf_prices = read_csv('px_etf.csv', parse_dates=['Date'], index_col='Date')
-    START_DATE = etf_prices.index[0]
-    END_DATE = etf_prices.index[-1]
-    ETFS = etf_prices.columns.values
+    start_date = etf_prices.index[0]
+    end_date = etf_prices.index[-1]
+    etfs = etf_prices.columns.values
 
-    etf_prices = dp.get_etf_prices(START_DATE, END_DATE)
-    etf_quantities = dp.get_etf_quantities(START_DATE, END_DATE, ETFS)
+    etf_prices = dp.get_etf_prices(start_date, end_date)
+    etf_quantities = dp.get_etf_quantities(start_date, end_date, etfs)
     positions_value = dp.get_positions_value(etf_prices, etf_quantities)
-    cash_flow = dp.get_cash_flow(etf_prices, START_DATE, END_DATE, INVESTMENT)
-    m_portfolio_perf = dp.get_portfolio_performance(positions_value, cash_flow, START_DATE, END_DATE, 'M')
-    y_portfolio_perf = dp.get_portfolio_performance(positions_value, cash_flow, START_DATE, END_DATE, 'Y')
+    cash_flow = dp.get_cash_flow(etf_prices, start_date, end_date, INVESTMENT)
+    m_portfolio_perf = dp.get_portfolio_performance(positions_value, cash_flow, start_date, end_date, 'M')
+    y_portfolio_perf = dp.get_portfolio_performance(positions_value, cash_flow, start_date, end_date, 'Y')
 
     print("Monthly Portfolio Performance")
     print(m_portfolio_perf.to_string(index=True, justify='left'))
